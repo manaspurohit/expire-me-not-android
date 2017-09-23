@@ -3,8 +3,10 @@ package com.manaspurohit.expiremenot
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
+import android.support.v7.widget.LinearLayoutManager
 import android.text.TextUtils
 import android.widget.EditText
+import com.manaspurohit.expiremenot.adapter.ItemRecyclerAdapter
 import kotlinx.android.synthetic.main.activity_item_list.*
 
 import java.text.ParseException
@@ -13,11 +15,18 @@ import java.util.*
 
 class ItemListActivity : AppCompatActivity() {
 
+    lateinit var itemRecyclerAdapter : ItemRecyclerAdapter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_item_list)
 
         btnAddItem.setOnClickListener { showAddItemDialog() }
+
+        rvItemList.setHasFixedSize(true)
+        rvItemList.layoutManager = LinearLayoutManager(this)
+        itemRecyclerAdapter = ItemRecyclerAdapter(this)
+        rvItemList.adapter = itemRecyclerAdapter
     }
 
     private fun showAddItemDialog() {
@@ -50,9 +59,10 @@ class ItemListActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            val sdf = SimpleDateFormat(getString(R.string.date_format), Locale.US)
+            val name: String = etName.text.toString()
 
-            val expireDate = try {
+            val sdf = SimpleDateFormat(getString(R.string.date_format), Locale.US)
+            val expireDate: Date = try {
                 val initialDate = sdf.parse(etDate.text.toString())
                 val cal = Calendar.getInstance()
                 cal.time = initialDate
@@ -69,7 +79,7 @@ class ItemListActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // TODO: Add item to recycler view
+            itemRecyclerAdapter.addItem(name, expireDate)
 
             dialog.dismiss()
         }
