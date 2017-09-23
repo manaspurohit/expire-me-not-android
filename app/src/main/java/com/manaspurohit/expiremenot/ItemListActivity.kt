@@ -15,17 +15,20 @@ import java.util.*
 
 class ItemListActivity : AppCompatActivity() {
 
-    lateinit var itemRecyclerAdapter : ItemRecyclerAdapter
+    private lateinit var itemRecyclerAdapter : ItemRecyclerAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_item_list)
 
+        val app = application as? ExpireMeNotApplication
+        app?.openRealm()
+
         btnAddItem.setOnClickListener { showAddItemDialog() }
 
         rvItemList.setHasFixedSize(true)
         rvItemList.layoutManager = LinearLayoutManager(this)
-        itemRecyclerAdapter = ItemRecyclerAdapter(this)
+        itemRecyclerAdapter = ItemRecyclerAdapter(this, app?.realmItem)
         rvItemList.adapter = itemRecyclerAdapter
     }
 
@@ -83,5 +86,10 @@ class ItemListActivity : AppCompatActivity() {
 
             dialog.dismiss()
         }
+    }
+
+    override fun onDestroy() {
+        (application as? ExpireMeNotApplication)?.closeRealm()
+        super.onDestroy()
     }
 }
