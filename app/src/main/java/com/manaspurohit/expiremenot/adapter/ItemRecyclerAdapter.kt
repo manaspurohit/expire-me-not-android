@@ -1,22 +1,22 @@
 package com.manaspurohit.expiremenot.adapter
 
-import com.manaspurohit.expiremenot.data.Item
-
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.view.ViewGroup
 import android.content.Context
 import android.view.LayoutInflater
 import android.widget.TextView
+import com.manaspurohit.expiremenot.data.Item
 import com.manaspurohit.expiremenot.R
 import io.realm.Realm
-import io.realm.RealmQuery
 import io.realm.RealmResults
 import io.realm.Sort
 import java.text.SimpleDateFormat
-import java.util.*
-
+import java.util.Date
+import java.util.Locale
+import java.util.UUID
 import kotlin.collections.ArrayList
+import kotlin.collections.MutableList
 
 class ItemRecyclerAdapter(
         private val context: Context,
@@ -58,7 +58,12 @@ class ItemRecyclerAdapter(
         newItem.expireDate = expireDate
         realmItem.commitTransaction()
 
-        listItem.add(Item(name, expireDate))
+        // binary search returns index if found or twos complement of insertion point if not found
+        // ..... mind = blown
+        var index = listItem.binarySearch { it.expireDate.compareTo(expireDate) }
+        if (index < 0) index = index.inv()
+
+        listItem.add(index, newItem)
         notifyDataSetChanged()
     }
 
