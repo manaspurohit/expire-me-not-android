@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.widget.TextView
 import com.manaspurohit.expiremenot.data.Item
 import com.manaspurohit.expiremenot.R
+import com.manaspurohit.expiremenot.touch.ItemTouchHelperAdapter
 import io.realm.Realm
 import io.realm.RealmResults
 import io.realm.Sort
@@ -21,7 +22,7 @@ import kotlin.collections.MutableList
 class ItemRecyclerAdapter(
         private val context: Context,
         private val realmItem: Realm?
-) : RecyclerView.Adapter<ItemRecyclerAdapter.ViewHolder>() {
+) : RecyclerView.Adapter<ItemRecyclerAdapter.ViewHolder>(), ItemTouchHelperAdapter {
 
     private val listItem : MutableList<Item> = ArrayList()
 
@@ -65,6 +66,17 @@ class ItemRecyclerAdapter(
 
         listItem.add(index, newItem)
         notifyDataSetChanged()
+    }
+
+    override fun onItemDismiss(position: Int?) {
+        if (position == null) return
+
+        realmItem?.beginTransaction()
+        listItem[position].deleteFromRealm()
+        realmItem?.commitTransaction()
+
+        listItem.removeAt(position)
+        notifyItemRemoved(position)
     }
 
     class ViewHolder(itemView: View?) : RecyclerView.ViewHolder(itemView) {

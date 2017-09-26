@@ -4,9 +4,11 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.helper.ItemTouchHelper
 import android.text.TextUtils
 import android.widget.EditText
 import com.manaspurohit.expiremenot.adapter.ItemRecyclerAdapter
+import com.manaspurohit.expiremenot.touch.ItemTouchHelperCallback
 import kotlinx.android.synthetic.main.activity_item_list.*
 
 import java.text.ParseException
@@ -30,6 +32,10 @@ class ItemListActivity : AppCompatActivity() {
         rvItemList.layoutManager = LinearLayoutManager(this)
         itemRecyclerAdapter = ItemRecyclerAdapter(this, app?.realmItem)
         rvItemList.adapter = itemRecyclerAdapter
+
+        val callback : ItemTouchHelper.Callback = ItemTouchHelperCallback(itemRecyclerAdapter)
+        val touchHelper = ItemTouchHelper(callback)
+        touchHelper.attachToRecyclerView(rvItemList)
     }
 
     private fun showAddItemDialog() {
