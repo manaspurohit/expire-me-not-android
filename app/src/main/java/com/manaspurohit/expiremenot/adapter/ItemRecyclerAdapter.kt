@@ -6,12 +6,14 @@ import android.view.ViewGroup
 import android.content.Context
 import android.view.LayoutInflater
 import android.widget.TextView
+import com.manaspurohit.expiremenot.ItemListActivity
 import com.manaspurohit.expiremenot.data.Item
 import com.manaspurohit.expiremenot.R
 import com.manaspurohit.expiremenot.touch.ItemTouchHelperAdapter
 import io.realm.Realm
 import io.realm.RealmResults
 import io.realm.Sort
+import kotlinx.android.synthetic.main.item_row.view.*
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -35,9 +37,9 @@ class ItemRecyclerAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): ViewHolder {
-        val todoItem : View = LayoutInflater.from(parent?.context).inflate(R.layout.item_row, parent, false)
+        val itemView : View = LayoutInflater.from(parent?.context).inflate(R.layout.item_row, parent, false)
 
-        return ViewHolder(todoItem)
+        return ViewHolder(itemView)
     }
 
     override fun getItemCount(): Int = listItem.size
@@ -47,7 +49,22 @@ class ItemRecyclerAdapter(
             it.tvItemName?.text = listItem[position].name
             val sdf = SimpleDateFormat("MM/dd/yyyy", Locale.US)
             it.tvItemDate?.text = sdf.format(listItem[position].expireDate)
+            it.itemView.setOnClickListener {
+                (context as? ItemListActivity)?.showEditItemDialog(it.tvItemName?.text.toString(),
+                        it.tvItemDate?.text.toString(), position)
+            }
         }
+    }
+
+    override fun onItemDismiss(position: Int?) {
+        if (position == null) return
+
+        realmItem?.beginTransaction()
+        listItem[position].deleteFromRealm()
+        realmItem?.commitTransaction()
+
+        listItem.removeAt(position)
+        notifyItemRemoved(position)
     }
 
     fun addItem(name: String, expireDate: Date) {
@@ -68,15 +85,16 @@ class ItemRecyclerAdapter(
         notifyDataSetChanged()
     }
 
-    override fun onItemDismiss(position: Int?) {
-        if (position == null) return
+    fun editItem(name: String, expireDate: Date, position: Int) {
+        if (realmItem == null) return
 
-        realmItem?.beginTransaction()
+        realmItem.beginTransaction()
         listItem[position].deleteFromRealm()
-        realmItem?.commitTransaction()
+        realmItem.commitTransaction()
 
         listItem.removeAt(position)
-        notifyItemRemoved(position)
+
+        addItem(name, expireDate)
     }
 
     class ViewHolder(itemView: View?) : RecyclerView.ViewHolder(itemView) {
